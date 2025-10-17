@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         () => {
-          model.setAttribute('gps-entity-place', 'latitude:36.5051736612296; longitude:138.11210376706708;');
+          model.setAttribute('gps-entity-place', 'latitude:36.3019; longitude:138.0644;');
         },
         () => {
           // GPS取得失敗時はそのまま中央表示
@@ -70,4 +70,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
+
 
