@@ -1,24 +1,44 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <title>現地投影WebAR - P5</title>
-  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
-</head>
-<body style="margin:0; overflow:hidden;">
+  <head>
+    <meta charset="UTF-8" />
+    <title>現地投影WebAR - iPhone対応版</title>
 
-<a-scene vr-mode-ui="enabled: false" embedded arjs="sourceType: webcam; gpsMinAccuracy: 30">
-  
-  <!-- P5のみ -->
-  <a-entity gps-entity-place="latitude: 36.50516960; longitude: 138.11219072"
-            gltf-model="model.glb"
-            scale="1 1 1">
-  </a-entity>
+    <!-- A-Frame と AR.js 読み込み -->
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
+  </head>
 
-</a-scene>
+  <body style="margin: 0; overflow: hidden;">
+    <a-scene
+      vr-mode-ui="enabled: false"
+      embedded
+      arjs="sourceType: webcam; gpsMinAccuracy: 30; gpsTimeInterval: 1000;"
+    >
+      <!-- 3Dモデルを座標に配置 -->
+      <a-entity
+        gps-entity-place="latitude: 36.50516960; longitude: 138.11219072;"
+        gltf-model="model.glb"
+        ios-src="model.usdz"
+        scale="10 10 10"
+      >
+      </a-entity>
 
-</body>
+      <!-- ロード中メッセージ -->
+      <a-text
+        value="モデル読み込み中..."
+        position="0 2 -3"
+        color="#FFFFFF"
+        align="center"
+        id="loadingText"
+      ></a-text>
+    </a-scene>
+
+    <script>
+      // モデルが読み込まれたらメッセージを消す
+      document.querySelector("a-entity").addEventListener("model-loaded", () => {
+        document.querySelector("#loadingText").setAttribute("visible", false);
+      });
+    </script>
+  </body>
 </html>
-
-
