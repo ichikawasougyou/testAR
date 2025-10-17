@@ -1,45 +1,28 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html>
   <head>
-    <meta charset="UTF-8" />
-    <title>現地投影WebAR - iPhone対応版</title>
-
-    <!-- A-Frame と AR.js 読み込み -->
+    <meta charset="utf-8">
+    <title>GPS AR Test</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
   </head>
-
   <body style="margin: 0; overflow: hidden;">
     <a-scene
       vr-mode-ui="enabled: false"
       embedded
-      arjs="sourceType: webcam; gpsMinAccuracy: 30; gpsTimeInterval: 1000;"
+      arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;"
+      renderer="logarithmicDepthBuffer: true;"
     >
-      <!-- 3Dモデルを座標に配置 -->
+      <!-- 現在地周辺でGPSによりモデルを配置 -->
       <a-entity
-        gps-entity-place="latitude: 36.5051749402544; longitude: 138.112100970028;"
-        gltf-model="model.glb"
-        ios-src="model.usdz"
-        scale="10 10 10"
-      >
-      </a-entity>
+        gps-entity-place="latitude: 36.5051736612296; longitude: 138.11210376706708;"
+        gltf-model="./model.glb"
+        scale="1 1 1"
+      ></a-entity>
 
-      <!-- ロード中メッセージ -->
-      <a-text
-        value="モデル読み込み中..."
-        position="0 2 -3"
-        color="#FFFFFF"
-        align="center"
-        id="loadingText"
-      ></a-text>
+      <a-camera gps-camera rotation-reader></a-camera>
     </a-scene>
-
-    <script>
-      // モデルが読み込まれたらメッセージを消す
-      document.querySelector("a-entity").addEventListener("model-loaded", () => {
-        document.querySelector("#loadingText").setAttribute("visible", false);
-      });
-    </script>
   </body>
 </html>
+
 
