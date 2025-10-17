@@ -1,76 +1,19 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>ARモデル表示サンプル</title>
-  <!-- A-Frame本体 -->
-  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-  <!-- AR.js (GPS) -->
-  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
-  <!-- Model Viewer (iPhone AR Quick Look用) -->
-  <script src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <title>iPhone AR確認</title>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 </head>
-<body style="margin: 0; overflow: hidden;">
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const isiPhone = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-
-  if (isiPhone) {
-    // iPhoneはUSDZをAR Quick Lookで表示
-    const modelViewer = document.createElement('model-viewer');
-    modelViewer.setAttribute('src', 'model.glb');      // GLBファイルも指定（互換性）
-    modelViewer.setAttribute('ios-src', 'model.usdz'); // USDZをiPhone用
-    modelViewer.setAttribute('ar', '');
-    modelViewer.setAttribute('ar-modes', 'quick-look');
-    modelViewer.setAttribute('camera-controls', '');
-    modelViewer.setAttribute('auto-rotate', '');
-    modelViewer.style.width = '100vw';
-    modelViewer.style.height = '100vh';
-    document.body.appendChild(modelViewer);
-
-  } else {
-    // Android / GPS対応 (屋外)
-    const scene = document.createElement('a-scene');
-    scene.setAttribute('embedded', '');
-    scene.setAttribute('vr-mode-ui', 'enabled: false');
-    scene.setAttribute('renderer', 'logarithmicDepthBuffer: true;');
-    scene.setAttribute('arjs', 'sourceType: webcam; trackingMethod: best; debugUIEnabled: false;');
-
-    const model = document.createElement('a-entity');
-
-    // GPSが取れない場合は画面中心に置く（屋内用）
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          // 屋外GPS取得できたら指定座標に配置
-          model.setAttribute('gps-entity-place', 'latitude:36.5051736612296; longitude:138.11210376706708;');
-        },
-        (err) => {
-          // GPS取得失敗（屋内） → 画面中央に固定
-          model.setAttribute('position', '0 0 -2');
-        },
-        { enableHighAccuracy: true, timeout: 5000 }
-      );
-    } else {
-      // GPS非対応ブラウザは画面中央に表示
-      model.setAttribute('position', '0 0 -2');
-    }
-
-    model.setAttribute('gltf-model', './model.glb');
-    model.setAttribute('scale', '1 1 1');
-    model.setAttribute('rotation', '0 0 0');
-    scene.appendChild(model);
-
-    const camera = document.createElement('a-camera');
-    camera.setAttribute('gps-camera', '');
-    camera.setAttribute('rotation-reader', '');
-    scene.appendChild(camera);
-
-    document.body.appendChild(scene);
-  }
-});
-</script>
-
+<body style="margin:0; overflow:hidden;">
+  <model-viewer 
+    src="model.glb" 
+    ios-src="model.usdz" 
+    ar 
+    ar-modes="quick-look" 
+    camera-controls 
+    auto-rotate 
+    style="width:100vw; height:100vh;">
+  </model-viewer>
 </body>
 </html>
