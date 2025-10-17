@@ -2,45 +2,22 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>現地投影WebAR</title>
+  <title>現地投影WebAR - P5</title>
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
 </head>
 <body style="margin:0; overflow:hidden;">
 
-<a-scene vr-mode-ui="enabled: false" embedded arjs="sourceType: webcam; gpsMinAccuracy: 100">
+<a-scene vr-mode-ui="enabled: false" embedded arjs="sourceType: webcam; gpsMinAccuracy: 30">
   
-  <!-- P5 -->
+  <!-- P5のみ -->
   <a-entity gps-entity-place="latitude: 35.68464089; longitude: 139.12069523"
             gltf-model="model.glb"
-            scale="5 5 5">
-  </a-entity>
-
-  <!-- P4 -->
-  <a-entity gps-entity-place="latitude: 35.68460280; longitude: 139.12075822"
-            gltf-model="model.glb"
-            scale="5 5 5">
-  </a-entity>
-
-  <!-- P3 -->
-  <a-entity gps-entity-place="latitude: 35.68473552; longitude: 139.12080450"
-            gltf-model="model.glb"
-            scale="5 5 5">
-  </a-entity>
-
-  <!-- P2 -->
-  <a-entity gps-entity-place="latitude: 35.68471843; longitude: 139.12060965"
-            gltf-model="model.glb"
-            scale="5 5 5">
-  </a-entity>
-
-  <!-- P1 -->
-  <a-entity gps-entity-place="latitude: 35.68468350; longitude: 139.12060104"
-            gltf-model="model.glb"
-            scale="5 5 5">
+            scale="1 1 1">
   </a-entity>
 
 </a-scene>
 
 </body>
 </html>
+
