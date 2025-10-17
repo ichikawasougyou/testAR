@@ -1,28 +1,54 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>GPS AR Test</title>
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
-  </head>
-  <body style="margin: 0; overflow: hidden;">
-    <a-scene
-      vr-mode-ui="enabled: false"
-      embedded
-      arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;"
-      renderer="logarithmicDepthBuffer: true;"
-    >
-      <!-- 現在地周辺でGPSによりモデルを配置 -->
-      <a-entity
-        gps-entity-place="latitude: 36.5051736612296; longitude: 138.11210376706708;"
-        gltf-model="./model.glb"
-        scale="1 1 1"
-      ></a-entity>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>現地AR投影（iPhone/Android対応）</title>
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
+  <script src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+</head>
+<body style="margin: 0; overflow: hidden;">
 
-      <a-camera gps-camera rotation-reader></a-camera>
-    </a-scene>
-  </body>
+<script>
+  // iPhoneかどうか判定
+  const isiPhone = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  document.addEventListener('DOMContentLoaded', () => {
+    if (isiPhone) {
+      // iPhoneはUSDZをModel Viewerで表示
+      const modelViewer = document.createElement('model-viewer');
+      modelViewer.setAttribute('src', 'model.glb');      // 3DモデルのGLBも指定
+      modelViewer.setAttribute('ios-src', 'model.usdz'); // iPhoneはUSDZを使用
+      modelViewer.setAttribute('ar', '');
+      modelViewer.setAttribute('ar-modes', 'quick-look');
+      modelViewer.setAttribute('camera-controls', '');
+      modelViewer.setAttribute('auto-rotate', '');
+      modelViewer.style.width = '100vw';
+      modelViewer.style.height = '100vh';
+      document.body.appendChild(modelViewer);
+    } else {
+      // AndroidはAR.jsでGPS表示
+      const scene = document.createElement('a-scene');
+      scene.setAttribute('embedded', '');
+      scene.setAttribute('vr-mode-ui', 'enabled: false');
+      scene.setAttribute('renderer', 'logarithmicDepthBuffer: true;');
+      scene.setAttribute('arjs', 'sourceType: webcam; trackingMethod: best; debugUIEnabled: false;');
+
+      const model = document.createElement('a-entity');
+      model.setAttribute('gps-entity-place', 'latitude: 36.5051736612296; longitude: 138.11210376706708;');
+      model.setAttribute('gltf-model', './model.glb');
+      model.setAttribute('scale', '1 1 1');
+      model.setAttribute('rotation', '0 0 0');
+      scene.appendChild(model);
+
+      const camera = document.createElement('a-camera');
+      camera.setAttribute('gps-camera', '');
+      camera.setAttribute('rotation-reader', '');
+      scene.appendChild(camera);
+
+      document.body.appendChild(scene);
+    }
+  });
+</script>
+
+</body>
 </html>
-
-
