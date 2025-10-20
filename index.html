@@ -1,71 +1,141 @@
 <!DOCTYPE html>
 <html lang="ja">
-  <head>
-    <meta charset="UTF-8" />
-    <title>現在地とモデル位置を表示</title>
-    <style>
-      #map {
-        height: 100vh;
-        width: 100%;
-      }
-    </style>
-    <script
-      src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap"
-      async
-      defer
-    ></script>
-    <script>
-      // モデルの座標
-      const modelLocation = { lat: 36.50516184328213, lng: 138.11215639377093 };
+<head>
+  <meta charset="utf-8" />
+  <title>現在地とモデル位置 (Leaflet + OSM)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-o9N1jZa0f4bN1Qh6k4f8p3KXhYqgR6Yf9v+v+g1w6Xk="
+    crossorigin=""
+  />
+  <style>
+    body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial; }
+    header { padding:12px; text-align:center; background:#f7f9fc; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+    #map { height: 60vh; width: 100%; }
+    .controls { padding:12px; display:flex; flex-direction:column; gap:8px; align-items:center; }
+    .coords-box { background:#fff; padding:10px 12px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.08); }
+    .btn { padding:8px 12px; border-radius:8px; border:1px solid #ddd; background:#fff; cursor:pointer; }
+    .btn:active { transform:translateY(1px); }
+    footer { padding:10px; text-align:center; color:#666; font-size:13px; }
+    @media (min-width:640px) { .layout { max-width:900px; margin:0 auto; } }
+  </style>
+  <!-- Leaflet JS -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-o2bM7kC6vXgI0aS1cQqZ4CqY4s6Q0z2R8qz9g+v9wY8="
+    crossorigin=""
+  ></script>
+</head>
+<body>
+  <header class="layout">
+    <h2>ARモデル位置と現在地（Leaflet）</h2>
+    <div style="font-size:14px; color:#444;">モデル位置：36.50516184328213, 138.11215639377093</div>
+  </header>
 
-      function initMap() {
-        // マップを初期化
-        const map = new google.maps.Map(document.getElementById("map"), {
-          center: modelLocation,
-          zoom: 15,
-        });
-
-        // モデル位置ピン
-        const modelMarker = new google.maps.Marker({
-          position: modelLocation,
-          map: map,
-          label: "📍モデル位置",
-        });
-
-        // 現在地取得
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(
-            (position) => {
-              const userLocation = {
-                lat: position.coords.latitude,
-                lng: position.coords.longitude,
-              };
-
-              // 現在地ピン
-              const userMarker = new google.maps.Marker({
-                position: userLocation,
-                map: map,
-                label: "🚶あなたの位置",
-              });
-
-              // 2点を含むようにマップ範囲を調整
-              const bounds = new google.maps.LatLngBounds();
-              bounds.extend(modelLocation);
-              bounds.extend(userLocation);
-              map.fitBounds(bounds);
-            },
-            () => {
-              alert("現在地を取得できませんでした。");
-            }
-          );
-        } else {
-          alert("ブラウザが位置情報に対応していません。");
-        }
-      }
-    </script>
-  </head>
-
-  <body>
+  <div class="layout">
     <div id="map"></div>
-  </body>
+
+    <div class="controls" style="margin-top:12px;">
+      <div class="coords-box">
+        <div>📏 距離： <strong id="distanceText">現在地取得中…</strong></div>
+        <div style="font-size:13px; color:#666; margin-top:6px;">※位置情報の許可を求められたら「許可」してください</div>
+      </div>
+
+      <div style="display:flex; gap:8px; margin-top:8px;">
+        <!-- Quick Lookを開くリンク（iPhoneでmodel.usdzがある場合に動作） -->
+        <a class="btn" href="model.usdz" rel="ar">ARで表示（Quick Look）</a>
+        <!-- Google Mapsでモデル位置を開く（別タブ） -->
+        <a class="btn" id="openMapBtn" target="_blank" rel="noopener">地図で開く</a>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Leaflet + OpenStreetMap を使用 — APIキー不要。ブラウザの位置情報を使います。
+  </footer>
+
+  <script>
+    // モデル位置（固定）
+    const modelLat = 36.50516184328213;
+    const modelLng = 138.11215639377093;
+    const modelLatLng = L.latLng(modelLat, modelLng);
+
+    // 初期マップ（中心はモデル位置）
+    const map = L.map('map', { zoomControl: true }).setView([modelLat, modelLng], 16);
+
+    // OpenStreetMap タイル
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    // モデルのマーカー（カスタムラベル風）
+    const modelMarker = L.marker([modelLat, modelLng]).addTo(map);
+    modelMarker.bindPopup('<strong>モデル位置</strong><br>36.50516184328213, 138.11215639377093');
+
+    // 初期でモデル位置を中心にする
+    map.setView(modelLatLng, 16);
+
+    // 距離表示用要素
+    const distanceEl = document.getElementById('distanceText');
+
+    // Google Mapsでモデル位置を開くボタン
+    const openMapBtn = document.getElementById('openMapBtn');
+    openMapBtn.href = `https://www.google.com/maps?q=${modelLat},${modelLng}&z=18`;
+
+    // 距離計算（Leaflet の distanceTo を利用）
+    function formatDistance(m) {
+      if (m === null) return '取得できません';
+      if (m < 1000) return `${m.toFixed(1)} m`;
+      return `${(m / 1000).toFixed(2)} km`;
+    }
+
+    // 現在地を取得してマーカーを置く、距離を計算
+    function placeUserMarker(position) {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+      const userLatLng = L.latLng(lat, lng);
+
+      // ユーザーマーカー（青）
+      const userMarker = L.marker(userLatLng, { title: 'あなたの現在地' }).addTo(map);
+      userMarker.bindPopup('<strong>あなたの現在地</strong>').openPopup();
+
+      // 距離を計算
+      const distanceMeters = userLatLng.distanceTo(modelLatLng); // meters
+      distanceEl.textContent = formatDistance(distanceMeters);
+
+      // マップ表示範囲を2点を含むように調整
+      const bounds = L.latLngBounds([userLatLng, modelLatLng]);
+      map.fitBounds(bounds, { padding: [60, 60] });
+    }
+
+    function handleGeolocationError(err) {
+      console.warn('Geolocation error', err);
+      distanceEl.textContent = '現在地を取得できませんでした';
+      // マップはモデル位置のまま（ユーザーマーカーなし）
+    }
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(placeUserMarker, handleGeolocationError, {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      });
+    } else {
+      distanceEl.textContent = '位置情報に対応していません';
+    }
+
+    // オプション: 位置が動くたびに更新したい場合は watchPosition を使う（コメントアウト）
+    /*
+    if (navigator.geolocation) {
+      navigator.geolocation.watchPosition((pos) => {
+        // 更新ロジック（既存マーカーを更新する等）
+      }, handleGeolocationError, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+    }
+    */
+  </script>
+</body>
 </html>
