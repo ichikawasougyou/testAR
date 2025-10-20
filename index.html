@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>ARモデル表示（Quick Look + 操作可能）</title>
+<title>ARモデル表示（Quick Look）</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
   body {
@@ -50,19 +50,15 @@
 </head>
 <body>
 
-<h1>ARモデルをカメラに出して操作</h1>
+<h1>ARモデルをカメラに出す</h1>
 
 <!-- Quick Look ARリンク -->
-<a href="model.usdz" rel="ar" 
-   arkit="allowsContentScaling=true; 
-           allowsCameraControl=true; 
-           enablesTranslation=true;">
+<a href="model.usdz" rel="ar">
   <img src="thumbnail.jpg" alt="ARモデルを表示">
 </a>
 
-<p>画像をタップすると、カメラ画面にモデルが出ます。<br>
-ピンチで拡大・縮小、二本指で回転・上下移動が可能です。<br>
-iPhone Safari専用です。</p>
+<p>画像をタップすると、カメラ画面にモデルを配置できます。<br>
+iPhone Safariでのみ動作します。</p>
 
 </body>
 </html>
