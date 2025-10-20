@@ -2,43 +2,69 @@
 <html lang="ja">
   <head>
     <meta charset="UTF-8" />
-    <title>ARでモデルを見る（Quick Look対応）</title>
+    <title>ARモデル表示（座標情報付き）</title>
     <style>
       body {
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
         height: 100vh;
-        background-color: #f2f2f2;
+        background-color: #f7f9fc;
         margin: 0;
-        flex-direction: column;
-        font-family: sans-serif;
+        font-family: "Helvetica Neue", sans-serif;
+        color: #333;
+      }
+
+      h1 {
+        font-size: 1.4rem;
+        margin-bottom: 1rem;
       }
 
       a[rel="ar"] img {
-        width: 200px;
-        border-radius: 12px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        transition: transform 0.2s;
+        width: 220px;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        transition: transform 0.2s, box-shadow 0.2s;
       }
 
       a[rel="ar"] img:hover {
         transform: scale(1.05);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
       }
 
-      p {
-        margin-top: 1em;
-        color: #333;
+      .coords {
+        margin-top: 1.2rem;
+        background: #ffffffb3;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      footer {
+        position: absolute;
+        bottom: 16px;
+        font-size: 0.8rem;
+        color: #777;
       }
     </style>
   </head>
 
   <body>
-    <!-- USDZモデルへのリンク -->
+    <h1>ARでモデルを見る</h1>
+
+    <!-- Quick Look リンク -->
     <a href="model.usdz" rel="ar">
       <img src="thumbnail.jpg" alt="ARで表示" />
     </a>
 
-    <p>⬆️ 画像をタップしてARで表示</p>
+    <div class="coords">
+      📍 このモデルは以下の位置を示しています：<br />
+      緯度：36.50516184328213<br />
+      経度：138.11215639377093
+    </div>
+
+    <footer>iPhoneのSafariで開くとARで床面に表示されます</footer>
   </body>
 </html>
