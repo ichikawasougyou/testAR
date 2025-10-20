@@ -2,135 +2,70 @@
 <html lang="ja">
   <head>
     <meta charset="UTF-8" />
-    <title>ARモデル表示（距離表示つき）</title>
+    <title>現在地とモデル位置を表示</title>
     <style>
-      body {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin: 0;
-        font-family: "Helvetica Neue", sans-serif;
-        background-color: #f7f9fc;
-        color: #333;
-        text-align: center;
-      }
-
-      h1 {
-        margin-top: 1.2rem;
-        font-size: 1.4rem;
-      }
-
-      a[rel="ar"] img {
-        width: 220px;
-        border-radius: 16px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-        transition: transform 0.2s, box-shadow 0.2s;
-        margin-top: 1rem;
-      }
-
-      a[rel="ar"] img:hover {
-        transform: scale(1.05);
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
-      }
-
-      .coords {
-        margin-top: 1.2rem;
-        background: #ffffffb3;
-        padding: 10px 16px;
-        border-radius: 8px;
-        font-size: 0.95rem;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      }
-
-      iframe {
-        width: 90%;
-        max-width: 500px;
-        height: 300px;
-        border: none;
-        border-radius: 12px;
-        margin: 1.2rem 0;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      }
-
-      footer {
-        font-size: 0.8rem;
-        color: #777;
-        margin-bottom: 1rem;
+      #map {
+        height: 100vh;
+        width: 100%;
       }
     </style>
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap"
+      async
+      defer
+    ></script>
+    <script>
+      // モデルの座標
+      const modelLocation = { lat: 36.50516184328213, lng: 138.11215639377093 };
+
+      function initMap() {
+        // マップを初期化
+        const map = new google.maps.Map(document.getElementById("map"), {
+          center: modelLocation,
+          zoom: 15,
+        });
+
+        // モデル位置ピン
+        const modelMarker = new google.maps.Marker({
+          position: modelLocation,
+          map: map,
+          label: "📍モデル位置",
+        });
+
+        // 現在地取得
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              const userLocation = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+              };
+
+              // 現在地ピン
+              const userMarker = new google.maps.Marker({
+                position: userLocation,
+                map: map,
+                label: "🚶あなたの位置",
+              });
+
+              // 2点を含むようにマップ範囲を調整
+              const bounds = new google.maps.LatLngBounds();
+              bounds.extend(modelLocation);
+              bounds.extend(userLocation);
+              map.fitBounds(bounds);
+            },
+            () => {
+              alert("現在地を取得できませんでした。");
+            }
+          );
+        } else {
+          alert("ブラウザが位置情報に対応していません。");
+        }
+      }
+    </script>
   </head>
 
   <body>
-    <h1>ARでモデルを見る</h1>
-
-    <!-- Quick Look リンク -->
-    <a href="model.usdz" rel="ar">
-      <img src="thumbnail.jpg" alt="ARで表示" />
-    </a>
-
-    <div class="coords">
-      📍 モデルの位置：<br />
-      緯度：36.50516184328213<br />
-      経度：138.11215639377093
-      <br /><br />
-      📏 あなたの現在地との距離：<span id="distance">計測中...</span>
-    </div>
-
-    <!-- Google Map 埋め込み（ピン付き） -->
-    <iframe
-      src="https://www.google.com/maps?q=36.50516184328213,138.11215639377093&z=18&output=embed"
-      allowfullscreen
-      loading="lazy"
-    ></iframe>
-
-    <footer>iPhoneのSafariで開くとARで床面に表示されます</footer>
-
-    <script>
-      // モデルの位置（固定）
-      const modelLat = 36.50516184328213;
-      const modelLng = 138.11215639377093;
-
-      // 距離計算関数（ハ―バーシン公式）
-      function calcDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371e3; // 地球の半径（メートル）
-        const toRad = (x) => (x * Math.PI) / 180;
-        const φ1 = toRad(lat1);
-        const φ2 = toRad(lat2);
-        const Δφ = toRad(lat2 - lat1);
-        const Δλ = toRad(lon2 - lon1);
-
-        const a =
-          Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-          Math.cos(φ1) * Math.cos(φ2) *
-          Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-        return R * c; // 距離（m）
-      }
-
-      // 現在地を取得して距離を表示
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            const userLat = pos.coords.latitude;
-            const userLng = pos.coords.longitude;
-            const dist = calcDistance(userLat, userLng, modelLat, modelLng);
-            const distanceText =
-              dist < 1000
-                ? `${dist.toFixed(1)} m`
-                : `${(dist / 1000).toFixed(2)} km`;
-            document.getElementById("distance").textContent = distanceText;
-          },
-          (err) => {
-            document.getElementById("distance").textContent =
-              "現在地を取得できませんでした";
-          },
-          { enableHighAccuracy: true, timeout: 8000 }
-        );
-      } else {
-        document.getElementById("distance").textContent =
-          "位置情報に非対応のブラウザです";
-      }
-    </script>
+    <div id="map"></div>
   </body>
 </html>
