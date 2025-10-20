@@ -2,18 +2,63 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>ARモデルをカメラに置く（iPhone用）</title>
+<title>ARモデル表示（Quick Look）</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body { display:flex; justify-content:center; align-items:center; height:100vh; margin:0; background:#f2f2f2; flex-direction:column; font-family:sans-serif; }
-a[rel="ar"] img { width:200px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.2); transition: transform 0.2s; }
-a[rel="ar"] img:hover { transform: scale(1.05); }
-p { margin-top:1em; color:#333; }
+  body {
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    margin:0;
+    background:#f2f2f2;
+    flex-direction:column;
+    font-family:sans-serif;
+  }
+
+  h1 {
+    font-size:20px;
+    margin-bottom:16px;
+    color:#333;
+    text-align:center;
+  }
+
+  a[rel="ar"] {
+    display:inline-block;
+    text-decoration:none;
+  }
+
+  a[rel="ar"] img {
+    width:250px;
+    border-radius:16px;
+    box-shadow:0 6px 20px rgba(0,0,0,0.25);
+    transition: transform 0.2s;
+  }
+
+  a[rel="ar"] img:hover {
+    transform: scale(1.05);
+  }
+
+  p {
+    margin-top:12px;
+    color:#555;
+    font-size:14px;
+    text-align:center;
+    max-width:300px;
+  }
 </style>
 </head>
 <body>
+
+<h1>ARモデルをカメラに出す</h1>
+
+<!-- Quick Look ARリンク -->
 <a href="model.usdz" rel="ar">
-  <img src="thumbnail.jpg" alt="ARで表示">
+  <img src="thumbnail.jpg" alt="ARモデルを表示">
 </a>
-<p>⬆️ 画像をタップしてカメラ上にモデルを配置</p>
+
+<p>画像をタップすると、カメラ画面にモデルを配置できます。<br>
+iPhone Safariでのみ動作します。</p>
+
 </body>
 </html>
