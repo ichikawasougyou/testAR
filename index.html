@@ -1,114 +1,64 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <title>ARモデル位置表示（Leaflet版）</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Leaflet CSS -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-o9N1jZa0f4bN1Qh6k4f8p3KXhYqgR6Yf9v+v+g1w6Xk="
-    crossorigin=""
-  />
-  <style>
-    body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial; background:#f7f9fc; color:#333; }
-    header { padding:12px; text-align:center; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
-    #map { height: 60vh; width: 100%; margin-top:10px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.15); }
-    .controls { padding:12px; display:flex; flex-direction:column; gap:8px; align-items:center; }
-    .coords-box { background:#fff; padding:10px 12px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.08); }
-    .btn { padding:8px 12px; border-radius:8px; border:1px solid #ddd; background:#fff; cursor:pointer; text-decoration:none; color:#333; }
-    .btn:active { transform:translateY(1px); }
-    footer { padding:10px; text-align:center; color:#666; font-size:13px; }
-  </style>
-  <!-- Leaflet JS -->
-  <script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-o2bM7kC6vXgI0aS1cQqZ4CqY4s6Q0z2R8qz9g+v9wY8="
-    crossorigin=""
-  ></script>
+<meta charset="UTF-8">
+<title>ARモデル表示（Quick Look）</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body {
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    margin:0;
+    background:#f2f2f2;
+    flex-direction:column;
+    font-family:sans-serif;
+  }
+
+  h1 {
+    font-size:20px;
+    margin-bottom:16px;
+    color:#333;
+    text-align:center;
+  }
+
+  a[rel="ar"] {
+    display:inline-block;
+    text-decoration:none;
+  }
+
+  a[rel="ar"] img {
+    width:250px;
+    border-radius:16px;
+    box-shadow:0 6px 20px rgba(0,0,0,0.25);
+    transition: transform 0.2s;
+  }
+
+  a[rel="ar"] img:hover {
+    transform: scale(1.05);
+  }
+
+  p {
+    margin-top:12px;
+    color:#555;
+    font-size:14px;
+    text-align:center;
+    max-width:300px;
+  }
+</style>
 </head>
 <body>
-  <header>
-    <h2>ARモデル位置と現在地</h2>
-    <div style="font-size:14px; color:#444;">モデル位置：36.50516184328213, 138.11215639377093</div>
-  </header>
 
-  <div id="map"></div>
+<h1>ARモデルをカメラに出す</h1>
 
-  <div class="controls">
-    <div class="coords-box">
-      📏 距離：<strong id="distanceText">現在地取得中…</strong><br>
-      ※位置情報の許可を求められたら「許可」してください
-    </div>
+<!-- Quick Look ARリンク -->
+<a href="model.usdz" rel="ar">
+  <img src="thumbnail.jpg" alt="ARモデルを表示">
+</a>
 
-    <div style="display:flex; gap:8px; margin-top:8px;">
-      <a class="btn" href="model.usdz" rel="ar">ARで表示（Quick Look）</a>
-      <a class="btn" id="openMapBtn" target="_blank" rel="noopener">OpenStreetMapで開く</a>
-    </div>
-  </div>
+<p>画像をタップすると、カメラ画面にモデルを配置できます。<br>
+iPhone Safariでのみ動作します。</p>
 
-  <footer>Leaflet + OpenStreetMap 使用 — 完全無料、APIキー不要</footer>
-
-  <script>
-    // モデル位置
-    const modelLat = 36.50516184328213;
-    const modelLng = 138.11215639377093;
-    const modelLatLng = L.latLng(modelLat, modelLng);
-
-    // マップ初期化
-    const map = L.map('map').setView(modelLatLng, 16);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    }).addTo(map);
-
-    // モデルマーカー
-    const modelMarker = L.marker(modelLatLng).addTo(map);
-    modelMarker.bindPopup('<strong>モデル位置</strong><br>36.50516184328213, 138.11215639377093');
-
-    // 距離表示
-    const distanceEl = document.getElementById('distanceText');
-
-    // OpenStreetMapで開くリンク
-    const openMapBtn = document.getElementById('openMapBtn');
-    openMapBtn.href = `https://www.openstreetmap.org/?mlat=${modelLat}&mlon=${modelLng}#map=18/${modelLat}/${modelLng}`;
-
-    // 現在地取得・マーカー追加・距離計算
-    function formatDistance(m) {
-      if (m === null) return '取得できません';
-      return m < 1000 ? `${m.toFixed(1)} m` : `${(m/1000).toFixed(2)} km`;
-    }
-
-    function placeUserMarker(pos) {
-      const lat = pos.coords.latitude;
-      const lng = pos.coords.longitude;
-      const userLatLng = L.latLng(lat, lng);
-
-      const userMarker = L.marker(userLatLng, { title: 'あなたの現在地' }).addTo(map);
-      userMarker.bindPopup('<strong>あなたの現在地</strong>').openPopup();
-
-      const distanceMeters = userLatLng.distanceTo(modelLatLng);
-      distanceEl.textContent = formatDistance(distanceMeters);
-
-      const bounds = L.latLngBounds([userLatLng, modelLatLng]);
-      map.fitBounds(bounds, { padding: [60, 60] });
-    }
-
-    function geoError(err) {
-      console.warn('位置情報エラー', err);
-      distanceEl.textContent = '現在地を取得できませんでした';
-    }
-
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(placeUserMarker, geoError, {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0
-      });
-    } else {
-      distanceEl.textContent = '位置情報に対応していません';
-    }
-  </script>
 </body>
 </html>
