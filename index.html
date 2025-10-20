@@ -2,46 +2,43 @@
 <html lang="ja">
   <head>
     <meta charset="UTF-8" />
-    <title>現地投影WebAR - iPhone対応版</title>
+    <title>ARでモデルを見る（Quick Look対応）</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f2f2f2;
+        margin: 0;
+        flex-direction: column;
+        font-family: sans-serif;
+      }
 
-    <!-- A-Frame と AR.js 読み込み -->
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
+      a[rel="ar"] img {
+        width: 200px;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        transition: transform 0.2s;
+      }
+
+      a[rel="ar"] img:hover {
+        transform: scale(1.05);
+      }
+
+      p {
+        margin-top: 1em;
+        color: #333;
+      }
+    </style>
   </head>
 
-  <body style="margin: 0; overflow: hidden;">
-    <a-scene
-      vr-mode-ui="enabled: false"
-      embedded
-      arjs="sourceType: webcam; gpsMinAccuracy: 30; gpsTimeInterval: 1000;"
-    >
-      <!-- 3Dモデルを座標に配置 -->
-      <a-entity
-        gps-entity-place="latitude: 36.50512; longitude: 138.11214;"
-        gltf-model="model.glb"
-        ios-src="model.usdz"
-        scale="10 10 10"
-      >
-      </a-entity>
+  <body>
+    <!-- USDZモデルへのリンク -->
+    <a href="model.usdz" rel="ar">
+      <img src="thumbnail.jpg" alt="ARで表示" />
+    </a>
 
-      <!-- ロード中メッセージ -->
-      <a-text
-        value="モデル読み込み中..."
-        position="0 2 -3"
-        color="#FFFFFF"
-        align="center"
-        id="loadingText"
-      ></a-text>
-    </a-scene>
-
-    <script>
-      // モデルが読み込まれたらメッセージを消す
-      document.querySelector("a-entity").addEventListener("model-loaded", () => {
-        document.querySelector("#loadingText").setAttribute("visible", false);
-      });
-    </script>
+    <p>⬆️ 画像をタップしてARで表示</p>
   </body>
 </html>
-
-
-
