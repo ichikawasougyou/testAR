@@ -6,7 +6,11 @@
 <title>AR 2点指定</title>
 
 <style>
-body { margin:0; overflow:hidden; font-family:sans-serif; }
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family: sans-serif;
+}
 #msg {
   position: fixed;
   top: 10px;
@@ -16,12 +20,14 @@ body { margin:0; overflow:hidden; font-family:sans-serif; }
   color: #fff;
   padding: 8px 12px;
   border-radius: 6px;
+  z-index: 10;
 }
 </style>
 </head>
 
 <body>
-<div id="msg">① 基準点をタップしてください</div>
+
+<div id="msg">「ARを開始」を押してください</div>
 
 <script type="module">
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
@@ -44,7 +50,7 @@ function init() {
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera();
 
-  renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.xr.enabled = true;
   document.body.appendChild(renderer.domElement);
@@ -68,6 +74,8 @@ function init() {
   scene.add(controller);
 
   renderer.xr.addEventListener('sessionstart', async () => {
+    msg.textContent = '① 基準点をタップしてください';
+
     const session = renderer.xr.getSession();
     refSpace = await session.requestReferenceSpace('local');
     const viewerSpace = await session.requestReferenceSpace('viewer');
@@ -111,8 +119,11 @@ function onSelect() {
 }
 
 function animate() {
-  renderer.setAnimationLoop(() => renderer.render(scene, camera));
+  renderer.setAnimationLoop(() => {
+    renderer.render(scene, camera);
+  });
 }
 </script>
+
 </body>
 </html>
