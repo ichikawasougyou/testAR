@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AR 2点指定</title>
+
+<style>
+body { margin:0; overflow:hidden; font-family:sans-serif; }
+#msg {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+</style>
+</head>
+
+<body>
+<div id="msg">① 基準点をタップしてください</div>
+
+<script type="module">
+import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+import { ARButton } from 'https://unpkg.com/three@0.160.0/examples/jsm/webxr/ARButton.js';
+import { GLTFLoader } from 'https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
+
+let camera, scene, renderer;
+let controller;
+let hitTestSource = null;
+let refSpace;
+let points = [];
+let model;
+
+const msg = document.getElementById('msg');
+
+init();
+animate();
+
+function init() {
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera();
+
+  renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.xr.enabled = true;
+  document.body.appendChild(renderer.domElement);
+
+  document.body.appendChild(
+    ARButton.createButton(renderer, { requiredFeatures: ['hit-test'] })
+  );
+
+  const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
+  scene.add(light);
+
+  const loader = new GLTFLoader();
+  loader.load('model.glb', gltf => {
+    model = gltf.scene;
+    model.visible = false;
+    scene.add(model);
+  });
+
+  controller = renderer.xr.getController(0);
+  controller.addEventListener('select', onSelect);
+  scene.add(controller);
+
+  renderer.xr.addEventListener('sessionstart', async () => {
+    const session = renderer.xr.getSession();
+    refSpace = await session.requestReferenceSpace('local');
+    const viewerSpace = await session.requestReferenceSpace('viewer');
+    hitTestSource = await session.requestHitTestSource({ space: viewerSpace });
+  });
+}
+
+function onSelect() {
+  if (!hitTestSource) return;
+
+  const frame = renderer.xr.getFrame();
+  const hitTestResults = frame.getHitTestResults(hitTestSource);
+  if (hitTestResults.length === 0) return;
+
+  const pose = hitTestResults[0].getPose(refSpace);
+  const p = new THREE.Vector3(
+    pose.transform.position.x,
+    pose.transform.position.y,
+    pose.transform.position.z
+  );
+
+  points.push(p.clone());
+
+  if (points.length === 1) {
+    msg.textContent = '② 方向点をタップしてください';
+  }
+
+  if (points.length === 2 && model) {
+    const p1 = points[0];
+    const p2 = points[1];
+
+    const dir = p2.clone().sub(p1);
+    const angle = Math.atan2(dir.x, dir.z);
+
+    model.position.copy(p1);
+    model.rotation.y = angle;
+    model.visible = true;
+
+    msg.textContent = '配置完了（モデル表示中）';
+  }
+}
+
+function animate() {
+  renderer.setAnimationLoop(() => renderer.render(scene, camera));
+}
+</script>
+</body>
+</html>
