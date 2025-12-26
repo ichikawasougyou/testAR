@@ -2,15 +2,24 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>iPhone AR</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
+<title>AR 実寸モデル表示</title>
+
+<!-- model-viewer -->
 <script type="module"
   src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js">
 </script>
 
 <style>
-body { margin:0; }
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+}
+
 model-viewer {
   width: 100vw;
   height: 100vh;
@@ -20,6 +29,12 @@ model-viewer {
 
 <body>
 
+<!--
+  ■ ポイント
+  ・ar-modes="quick-look" → iPhone用
+  ・ar-placement="floor" → 地面配置
+  ・scaleはいじらない（GLBを信じる）
+-->
 <model-viewer
   src="model.glb"
   ar
@@ -28,6 +43,20 @@ model-viewer {
   camera-controls
   environment-image="neutral"
   shadow-intensity="1">
+
+  <!-- AR前の説明 -->
+  <div slot="poster"
+       style="
+         display:flex;
+         align-items:center;
+         justify-content:center;
+         height:100%;
+         color:#fff;
+         font-size:16px;
+         background:#111;">
+    ARボタンを押して実寸表示
+  </div>
+
 </model-viewer>
 
 </body>
