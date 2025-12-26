@@ -41,90 +41,38 @@
   id="viewer"
   src="model.glb"
   ar
-  ar-modes="webxr quick-look"
+  ar-modes="quick-look"
+  ar-placement="floor"
   camera-controls
-  tone-mapping="neutral"
-  shadow-intensity="1"
   style="width:100vw;height:100vh;">
 </model-viewer>
 
 <div id="ui">
-  <div id="msg">AR開始を押してください</div>
-  <button id="startAR">AR開始</button>
+  <button onclick="setA()">A決定</button>
+  <button onclick="setB()">B決定</button>
 </div>
 
 <script>
-const viewer = document.getElementById("viewer");
-const msg = document.getElementById("msg");
-const startBtn = document.getElementById("startAR");
+let headingA = null;
 
-let points = [];
-let step = 0;
-
-// AR開始
-startBtn.onclick = async () => {
-  await viewer.activateAR();
-  msg.textContent = "基準点Aをタップしてください";
-  startBtn.style.display = "none";
-};
-
-// 画面タップ（ヒットテスト）
-viewer.addEventListener("click", async (e) => {
-  if (!viewer.arStatus === "session-started") return;
-  if (points.length >= 2) return;
-
-  const hit = await viewer.positionAndNormalFromPoint(
-    e.clientX,
-    e.clientY
-  );
-
-  if (!hit) return;
-
-  points.push(hit.position);
-  placeMarker(hit.position);
-
-  if (points.length === 1) {
-    msg.textContent = "基準点Bをタップしてください";
-  }
-
-  if (points.length === 2) {
-    alignModel(points[0], points[1]);
-    msg.textContent = "配置完了";
-  }
-});
-
-// マーカー表示
-function placeMarker(pos) {
-  const marker = document.createElement("model-viewer");
-  marker.src =
-    "data:model/gltf-binary;base64,AAAAGGZ0eXBnb..." // 簡易球体（省略OK）
-  marker.style.display = "none";
-
-  viewer.scene.add({
-    type: "sphere",
-    radius: 0.05,
-    position: pos,
-    material: { color: "red" }
-  });
+function setA() {
+  headingA = window.orientation || 0;
+  alert("Aを設定しました");
 }
 
-// モデルをA→B方向へ回転
-function alignModel(A, B) {
-  const dx = B.x - A.x;
-  const dz = B.z - A.z;
-  const angle = Math.atan2(dx, dz);
+function setB() {
+  if (headingA === null) return;
+  const headingB = window.orientation || 0;
+  const diff = headingB - headingA;
 
-  viewer.orientation = `0 ${angle * 180 / Math.PI} 0`;
-  viewer.position = `${A.x} ${A.y} ${A.z}`;
+  document.getElementById("viewer").orientation =
+    `0 ${diff} 0`;
+
+  alert("モデルをA→B方向に回転しました");
 }
-
-// 🧭 北向き矢印
-window.addEventListener("deviceorientationabsolute", (e) => {
-  if (!viewer.scene) return;
-  const heading = e.alpha || 0;
-  viewer.scene.rotation.y = -heading * Math.PI / 180;
-});
 </script>
+
 
 </body>
 </html>
+
