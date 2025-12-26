@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Android AR（2点指定＋マーカー）</title>
+
+<style>
+body { margin:0; overflow:hidden; }
+#msg {
+  position:fixed;
+  top:10px;
+  left:50%;
+  transform:translateX(-50%);
+  background:rgba(0,0,0,0.7);
+  color:#fff;
+  padding:8px 14px;
+  border-radius:8px;
+  font-size:14px;
+}
+</style>
+</head>
+
+<body>
+<div id="msg">① 基準点Aをタップしてください</div>
+
+<script type="module">
+import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+import { ARButton } from 'https://unpkg.com/three@0.160.0/examples/jsm/webxr/ARButton.js';
+import { GLTFLoader } from 'https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
+
+let scene, camera, renderer;
+let hitTestSource, refSpace;
+let points = [];
+let model;
+
+const msg = document.getElementById('msg');
+
+init();
+
+function init() {
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera();
+
+  renderer = new THREE.WebGLRenderer({ alpha:true, antialias:true });
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.xr.enabled = true;
+  document.body.appendChild(renderer.domElement);
+
+  document.body.appendChild(
+    ARButton.createButton(renderer, { requiredFeatures:['hit-test'] })
+  );
+
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1));
+
+  new GLTFLoader().load('model.glb', g => {
+    model = g.scene;
+    model.visible = false;
+    scene.add(model);
+  });
+
+  const controller = renderer.xr.getController(0);
+  controller.addEventListener('select', onSelect);
+  scene.add(controller);
+
+  renderer.xr.addEventListener('sessionstart', async () => {
+    const session = renderer.xr.getSession();
+    refSpace = await session.requestReferenceSpace('local');
+    const viewer = await session.requestReferenceSpace('viewer');
+    hitTestSource = await session.requestHitTestSource({ space: viewer });
+  });
+
+  renderer.setAnimationLoop(() => renderer.render(scene, camera));
+}
+
+/* ===== マーカー生成 ===== */
+function createMarker(position, color) {
+  const geo = new THREE.SphereGeometry(0.05, 16, 16); // 半径5cm
+  const mat = new THREE.MeshStandardMaterial({ color });
+  const marker = new THREE.Mesh(geo, mat);
+  marker.position.copy(position);
+  marker.position.y += 0.025; // 少し浮かせる
+  scene.add(marker);
+}
+
+/* ===== タップ処理 ===== */
+function onSelect() {
+  const frame = renderer.xr.getFrame();
+  if (!frame || !hitTestSource) return;
+
+  const hit = frame.getHitTestResults(hitTestSource)[0];
+  if (!hit) return;
+
+  const pose = hit.getPose(refSpace);
+  const p = new THREE.Vector3(
+    pose.transform.position.x,
+    pose.transform.position.y,
+    pose.transform.position.z
+  );
+
+  points.push(p.clone());
+
+  // A点
+  if (points.length === 1) {
+    createMarker(p, 0xff0000); // 赤
+    msg.textContent = '② 基準点Bをタップしてください';
+  }
+
+  // B点 → モデル配置
+  if (points.length === 2 && model) {
+    createMarker(p, 0x0066ff); // 青
+
+    const A = points[0];
+    const B = points[1];
+    const dir = B.clone().sub(A);
+
+    model.position.copy(A);
+    model.rotation.y = Math.atan2(dir.x, dir.z);
+    model.visible = true;
+
+    msg.textContent = '配置完了（A=赤 / B=青）';
+  }
+}
+</script>
+</body>
+</html>
