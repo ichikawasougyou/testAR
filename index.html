@@ -1,78 +1,25 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-<title>現地AR配置</title>
-
-<script type="module"
-  src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js">
-</script>
-
-<style>
-  body {
-    margin: 0;
-    font-family: sans-serif;
-    background: #000;
-  }
-  #ui {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 10;
-    text-align: center;
-  }
-  button {
-    font-size: 16px;
-    padding: 10px 20px;
-  }
-  #msg {
-    color: white;
-    margin-bottom: 8px;
-  }
-</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AR起動中…</title>
 </head>
-
 <body>
 
-<model-viewer
-  id="viewer"
-  src="model.glb"
-  ar
-  ar-modes="quick-look"
-  ar-placement="floor"
-  camera-controls
-  style="width:100vw;height:100vh;">
-</model-viewer>
-
-<div id="ui">
-  <button onclick="setA()">A決定</button>
-  <button onclick="setB()">B決定</button>
-</div>
+<p>端末を判別しています…</p>
 
 <script>
-let headingA = null;
+const ua = navigator.userAgent;
 
-function setA() {
-  headingA = window.orientation || 0;
-  alert("Aを設定しました");
-}
-
-function setB() {
-  if (headingA === null) return;
-  const headingB = window.orientation || 0;
-  const diff = headingB - headingA;
-
-  document.getElementById("viewer").orientation =
-    `0 ${diff} 0`;
-
-  alert("モデルをA→B方向に回転しました");
+if (/iPhone|iPad|iPod/.test(ua)) {
+  location.href = "ar-ios.html";
+} else if (/Android/.test(ua)) {
+  location.href = "ar-android.html";
+} else {
+  location.href = "pc-view.html";
 }
 </script>
-
 
 </body>
 </html>
-
